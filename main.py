@@ -1,39 +1,48 @@
+import time
 from turtle import Screen
-from turtle import Turtle
+from paddle import Paddle
+from ball import Ball
+from scoreboard import Scoreboard
+
 
 screen = Screen()
 screen.bgcolor("black")
 screen.setup(width=800, height= 600)
 screen.title("Pong")
 screen.tracer(0)
-paddle = Turtle()
-paddle.color("white")
-paddle.shape("square")
 
-paddle.shapesize(stretch_len=1, stretch_wid=5)
+r_paddle = Paddle((350,0))
+l_paddle = Paddle((-350,0))
+ball = Ball()
+scoreboard = Scoreboard()
 
-paddle.penup()
-
-
-paddle.goto(x=350, y = 0)
-
-def go_up():
-    new_y = paddle.ycor() + 20
-    paddle.goto(paddle.xcor(), new_y)
-
-def go_down():
-    new_y = paddle.ycor() - 20
-    paddle.goto(paddle.xcor(), new_y)
 screen.listen()
-screen.onkey(go_up, "Up")
-screen.onkey(go_down, "Down")
+screen.onkey(r_paddle.go_up, "Up")
+screen.onkey(r_paddle.go_down, "Down")
+screen.onkey(l_paddle.go_up, "w")
+screen.onkey(l_paddle.go_down, "s")
 
 
 game_is_on = True
 while game_is_on:
+    time.sleep(ball.move_speed)
     screen.update()
+    ball.move()
 
+    # detect collusion with wall
+    if ball.ycor() > 280 or ball.ycor() < -280:
+        ball.bounce_y()
 
+    # detect collusion with paddle
+    if ball.distance(r_paddle) < 50 and ball.xcor() > 320 or ball.distance(l_paddle) < 50 and ball.xcor() < -320 :
+        ball.bounce_x()
 
+    # detect if the ball goes out
+    if ball.xcor() > 380:
+        ball.reset_position()
+        scoreboard.l_point()
 
+    if ball.xcor() < -380:
+        ball.reset_position()
+        scoreboard.r_point()
 screen.exitonclick()
